@@ -1,0 +1,570 @@
+[
+  {
+    "id": "GB-50327-2001",
+    "title": "GB 50327-2001 住宅装饰装修工程施工规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050327-2001",
+    "local_path": "raw/GB-50327-2001.pdf",
+    "output": "70-GB-50327-2001-residential-decoration-construction.md",
+    "category": "core_acceptance",
+    "priority": 1,
+    "tags": [
+      "住宅装修",
+      "施工",
+      "验收",
+      "水电",
+      "防水",
+      "瓦工"
+    ],
+    "notes": "住宅装饰装修核心施工规范。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+    {
+    "id": "GB-50303-2015",
+    "title": "GB 50303-2015 建筑电气工程施工质量验收规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050303-2015",
+    "local_path": "raw/GB-50303-2015.pdf",
+    "output": "79-GB-50303-2015-building-electrical-quality-acceptance.md",
+    "category": "water_electricity",
+    "priority": 1,
+    "tags": [
+      "电气",
+      "强电",
+      "插座",
+      "开关",
+      "配电箱",
+      "接地"
+    ],
+    "notes": "电气工程施工质量验收常用标准。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-50210-2018",
+    "title": "GB 50210-2018 建筑装饰装修工程质量验收标准",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050210-2018",
+    "local_path": "raw/GB-50210-2018.pdf",
+    "output": "71-GB-50210-2018-decoration-quality-acceptance.md",
+    "category": "core_acceptance",
+    "priority": 1,
+    "tags": [
+      "装饰装修",
+      "质量验收",
+      "抹灰",
+      "门窗",
+      "吊顶",
+      "饰面砖"
+    ],
+    "notes": "装饰装修质量验收核心标准。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-50325-2020",
+    "title": "GB 50325-2020 民用建筑工程室内环境污染控制标准",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050325-2020",
+    "local_path": "raw/GB-50325-2020.pdf",
+    "output": "72-GB-50325-2020-indoor-pollution-control.md",
+    "category": "environment",
+    "priority": 1,
+    "tags": [
+      "室内环境",
+      "甲醛",
+      "苯",
+      "TVOC",
+      "氡",
+      "验收"
+    ],
+    "notes": "室内环境工程污染控制核心标准。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-T-18883-2022",
+    "title": "GB/T 18883-2022 室内空气质量标准",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB/T%2018883-2022",
+    "local_path": "raw/GB-T-18883-2022.pdf",
+    "output": "73-GBT-18883-2022-indoor-air-quality.md",
+    "category": "environment",
+    "priority": 1,
+    "tags": [
+      "室内空气",
+      "甲醛",
+      "苯",
+      "TVOC",
+      "PM2.5",
+      "检测"
+    ],
+    "notes": "室内空气质量评价标准。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-12523-2025",
+    "title": "GB 12523-2025 建筑施工噪声排放标准",
+    "source_url": "https://www.mee.gov.cn/searchnew/?searchword=GB%2012523-2025",
+    "local_path": "raw/GB-12523-2025.pdf",
+    "output": "74-GB-12523-2025-construction-noise.md",
+    "category": "construction_environment",
+    "priority": 2,
+    "tags": [
+      "施工噪声",
+      "扰民",
+      "环保",
+      "投诉"
+    ],
+    "notes": "施工噪声排放相关标准。建议优先使用生态环境部标准文本并核验实施日期。",
+    "download_url": ""
+  },
+  {
+    "id": "HJ-1462-2026",
+    "title": "HJ 1462-2026 建筑垃圾污染控制技术规范",
+    "source_url": "https://www.mee.gov.cn/searchnew/?searchword=HJ%201462-2026",
+    "local_path": "raw/HJ-1462-2026.pdf",
+    "output": "75-HJ-1462-2026-construction-waste.md",
+    "category": "construction_environment",
+    "priority": 2,
+    "tags": [
+      "建筑垃圾",
+      "拆改",
+      "清运",
+      "污染控制"
+    ],
+    "notes": "建筑垃圾污染控制技术规范。建议优先使用生态环境部标准文本并核验实施日期。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-50300-2013",
+    "title": "GB 50300-2013 建筑工程施工质量验收统一标准",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050300-2013",
+    "local_path": "raw/GB-50300-2013.pdf",
+    "output": "76-GB-50300-2013-construction-quality-acceptance-unified.md",
+    "category": "core_acceptance",
+    "priority": 1,
+    "tags": [
+      "施工质量",
+      "统一验收",
+      "分项工程",
+      "检验批"
+    ],
+    "notes": "建筑工程施工质量验收基础性标准。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-50209-2010",
+    "title": "GB 50209-2010 建筑地面工程施工质量验收规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050209-2010",
+    "local_path": "raw/GB-50209-2010.pdf",
+    "output": "77-GB-50209-2010-building-ground-quality-acceptance.md",
+    "category": "core_acceptance",
+    "priority": 1,
+    "tags": [
+      "地面",
+      "找平",
+      "地砖",
+      "地板",
+      "空鼓",
+      "坡度"
+    ],
+    "notes": "地面工程质量验收标准，适用于找平、地砖、地板基层等问题。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-50242-2002",
+    "title": "GB 50242-2002 建筑给水排水及采暖工程施工质量验收规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050242-2002",
+    "local_path": "raw/GB-50242-2002.pdf",
+    "output": "78-GB-50242-2002-water-drainage-heating-quality-acceptance.md",
+    "category": "water_electricity",
+    "priority": 1,
+    "tags": [
+      "给水",
+      "排水",
+      "采暖",
+      "打压",
+      "地漏",
+      "坡度"
+    ],
+    "notes": "水路、排水、采暖施工质量验收常用标准。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-50243-2016",
+    "title": "GB 50243-2016 通风与空调工程施工质量验收规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050243-2016",
+    "local_path": "raw/GB-50243-2016.docx",
+    "output": "80-GB-50243-2016-ventilation-ac-quality-acceptance.md",
+    "category": "installation",
+    "priority": 1,
+    "tags": [
+      "通风",
+      "空调",
+      "中央空调",
+      "新风",
+      "风管"
+    ],
+    "notes": "中央空调、新风、通风工程施工质量验收常用标准。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-55030-2022",
+    "title": "GB 55030-2022 建筑与市政工程防水通用规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2055030-2022",
+    "local_path": "raw/GB-55030-2022.pdf",
+    "output": "81-GB-55030-2022-waterproof-general-code.md",
+    "category": "waterproof",
+    "priority": 1,
+    "tags": [
+      "防水",
+      "卫生间",
+      "厨房",
+      "阳台",
+      "闭水",
+      "渗漏"
+    ],
+    "notes": "防水强制性通用规范。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-55024-2022",
+    "title": "GB 55024-2022 建筑电气与智能化通用规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2055024-2022",
+    "local_path": "raw/GB-55024-2022.pdf",
+    "output": "82-GB-55024-2022-electrical-intelligent-general-code.md",
+    "category": "fire_electrical",
+    "priority": 1,
+    "tags": [
+      "电气",
+      "智能化",
+      "弱电",
+      "安全",
+      "强制性规范"
+    ],
+    "notes": "建筑电气与智能化强制性通用规范。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-55037-2022",
+    "title": "GB 55037-2022 建筑防火通用规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2055037-2022",
+    "local_path": "raw/GB-55037-2022.pdf",
+    "output": "83-GB-55037-2022-fire-protection-general-code.md",
+    "category": "fire_electrical",
+    "priority": 1,
+    "tags": [
+      "防火",
+      "消防",
+      "材料燃烧性能",
+      "疏散",
+      "强制性规范"
+    ],
+    "notes": "建筑防火强制性通用规范。涉及消防安全时优先核验。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-50222-2017",
+    "title": "GB 50222-2017 建筑内部装修设计防火规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050222-2017",
+    "local_path": "raw/GB-50222-2017.pdf",
+    "output": "84-GB-50222-2017-interior-decoration-fire-code.md",
+    "category": "fire_electrical",
+    "priority": 1,
+    "tags": [
+      "室内装修",
+      "防火",
+      "材料",
+      "吊顶",
+      "墙面"
+    ],
+    "notes": "内部装修防火设计常用标准。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-50096-2011",
+    "title": "GB 50096-2011 住宅设计规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050096-2011",
+    "local_path": "raw/GB-50096-2011.pdf",
+    "output": "85-GB-50096-2011-residential-design-code.md",
+    "category": "design",
+    "priority": 2,
+    "tags": [
+      "住宅设计",
+      "空间尺度",
+      "采光",
+      "通风",
+      "安全"
+    ],
+    "notes": "住宅空间设计基础标准，适合回答布局、采光、通风等问题。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-55031-2022",
+    "title": "GB 55031-2022 民用建筑通用规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2055031-2022",
+    "local_path": "raw/GB-55031-2022.pdf",
+    "output": "86-GB-55031-2022-civil-building-general-code.md",
+    "category": "design",
+    "priority": 2,
+    "tags": [
+      "民用建筑",
+      "通用规范",
+      "安全",
+      "功能"
+    ],
+    "notes": "民用建筑强制性通用规范。涉及建筑基本安全和功能时参考。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-55032-2022",
+    "title": "GB 55032-2022 建筑与市政工程施工质量控制通用规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2055032-2022",
+    "local_path": "raw/GB-55032-2022.pdf",
+    "output": "87-GB-55032-2022-construction-quality-control-general-code.md",
+    "category": "core_acceptance",
+    "priority": 2,
+    "tags": [
+      "施工质量",
+      "质量控制",
+      "强制性规范",
+      "验收"
+    ],
+    "notes": "施工质量控制强制性通用规范。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-55020-2021",
+    "title": "GB 55020-2021 建筑给水排水与节水通用规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2055020-2021",
+    "local_path": "raw/GB-55020-2021.pdf",
+    "output": "88-GB-55020-2021-water-drainage-water-saving-general-code.md",
+    "category": "water_electricity",
+    "priority": 2,
+    "tags": [
+      "给水",
+      "排水",
+      "节水",
+      "强制性规范"
+    ],
+    "notes": "给排水与节水强制性通用规范。适合水路和排水系统问题。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-50015-2019",
+    "title": "GB 50015-2019 建筑给水排水设计标准",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050015-2019",
+    "local_path": "raw/GB-50015-2019.pdf",
+    "output": "89-GB-50015-2019-building-water-drainage-design-standard.md",
+    "category": "water_electricity",
+    "priority": 2,
+    "tags": [
+      "给水",
+      "排水",
+      "设计",
+      "地漏",
+      "管径"
+    ],
+    "notes": "给排水设计标准。用于解释排水、地漏、管径和系统设计类问题。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-50054-2011",
+    "title": "GB 50054-2011 低压配电设计规范",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2050054-2011",
+    "local_path": "raw/GB-50054-2011.pdf",
+    "output": "90-GB-50054-2011-low-voltage-power-distribution-design.md",
+    "category": "water_electricity",
+    "priority": 2,
+    "tags": [
+      "低压配电",
+      "回路",
+      "配电箱",
+      "电气设计"
+    ],
+    "notes": "低压配电设计标准。涉及回路、配电箱和用电安全时参考。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-18580-2025",
+    "title": "GB 18580-2025 室内装饰装修材料 人造板及其制品中甲醛释放限量",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2018580-2025",
+    "local_path": "raw/GB-18580-2025.pdf",
+    "output": "91-GB-18580-2025-wood-panel-formaldehyde-limit.md",
+    "category": "material",
+    "priority": 1,
+    "tags": [
+      "人造板",
+      "板材",
+      "甲醛",
+      "环保",
+      "柜体"
+    ],
+    "notes": "板材甲醛释放限量核心标准。适合柜体、木作、地板环保问题。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-18581-2020",
+    "title": "GB 18581-2020 木器涂料中有害物质限量",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2018581-2020",
+    "local_path": "raw/GB-18581-2020.pdf",
+    "output": "92-GB-18581-2020-wood-coatings-hazardous-substances-limit.md",
+    "category": "material",
+    "priority": 2,
+    "tags": [
+      "木器涂料",
+      "油漆",
+      "有害物质",
+      "环保"
+    ],
+    "notes": "木器涂料有害物质限量标准。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-18582-2020",
+    "title": "GB 18582-2020 建筑用墙面涂料中有害物质限量",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2018582-2020",
+    "local_path": "raw/GB-18582-2020.pdf",
+    "output": "93-GB-18582-2020-wall-coatings-hazardous-substances-limit.md",
+    "category": "material",
+    "priority": 1,
+    "tags": [
+      "乳胶漆",
+      "墙面涂料",
+      "有害物质",
+      "环保"
+    ],
+    "notes": "墙面涂料有害物质限量核心标准。适合乳胶漆选购和环保问题。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-33372-2020",
+    "title": "GB 33372-2020 胶粘剂挥发性有机化合物限量",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2033372-2020",
+    "local_path": "raw/GB-33372-2020.pdf",
+    "output": "94-GB-33372-2020-adhesive-voc-limit.md",
+    "category": "material",
+    "priority": 2,
+    "tags": [
+      "胶粘剂",
+      "VOC",
+      "环保",
+      "辅材"
+    ],
+    "notes": "胶粘剂 VOC 限量标准。适合辅材和环保风险问题。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-18583-2008",
+    "title": "GB 18583-2008 室内装饰装修材料 胶粘剂中有害物质限量",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2018583-2008",
+    "local_path": "raw/GB-18583-2008.pdf",
+    "output": "95-GB-18583-2008-adhesives-hazardous-substances-limit.md",
+    "category": "material",
+    "priority": 3,
+    "tags": [
+      "胶粘剂",
+      "有害物质",
+      "环保",
+      "辅材"
+    ],
+    "notes": "胶粘剂有害物质限量历史常用标准。使用前请核验是否被新标准替代或部分替代。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-18584-2024",
+    "title": "GB 18584-2024 室内装饰装修材料 木家具中有害物质限量",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2018584-2024",
+    "local_path": "raw/GB-18584-2024.pdf",
+    "output": "96-GB-18584-2024-wood-furniture-hazardous-substances-limit.md",
+    "category": "material",
+    "priority": 2,
+    "tags": [
+      "木家具",
+      "柜体",
+      "甲醛",
+      "环保"
+    ],
+    "notes": "木家具有害物质限量标准。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-18587-2001",
+    "title": "GB 18587-2001 室内装饰装修材料 地毯、地毯衬垫及地毯胶粘剂有害物质释放限量",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%2018587-2001",
+    "local_path": "raw/GB-18587-2001.pdf",
+    "output": "97-GB-18587-2001-carpet-hazardous-substances-limit.md",
+    "category": "material",
+    "priority": 3,
+    "tags": [
+      "地毯",
+      "胶粘剂",
+      "有害物质",
+      "环保"
+    ],
+    "notes": "地毯及相关胶粘剂有害物质释放限量标准。使用前请到官方平台核验现行状态。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-6566-2010",
+    "title": "GB 6566-2010 建筑材料放射性核素限量",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB%206566-2010",
+    "local_path": "raw/GB-6566-2010.pdf",
+    "output": "98-GB-6566-2010-building-material-radionuclide-limit.md",
+    "category": "material",
+    "priority": 1,
+    "tags": [
+      "瓷砖",
+      "石材",
+      "放射性",
+      "材料安全"
+    ],
+    "notes": "建筑材料放射性核素限量核心标准。适合瓷砖、石材材料安全问题。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-T-4100-2015",
+    "title": "GB/T 4100-2015 陶瓷砖",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB/T%204100-2015",
+    "local_path": "raw/GB-T-4100-2015.pdf",
+    "output": "99-GBT-4100-2015-ceramic-tiles.md",
+    "category": "material",
+    "priority": 2,
+    "tags": [
+      "瓷砖",
+      "规格",
+      "吸水率",
+      "材料"
+    ],
+    "notes": "陶瓷砖产品标准。适合瓷砖选购、规格和性能问题。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-T-18102-2020",
+    "title": "GB/T 18102-2020 浸渍纸层压木质地板",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB/T%2018102-2020",
+    "local_path": "raw/GB-T-18102-2020.pdf",
+    "output": "100-GBT-18102-2020-laminate-flooring.md",
+    "category": "material",
+    "priority": 2,
+    "tags": [
+      "木地板",
+      "强化地板",
+      "材料",
+      "环保"
+    ],
+    "notes": "强化木地板产品标准。适合地板选购和验收问题。",
+    "download_url": ""
+  },
+  {
+    "id": "GB-T-8478-2020",
+    "title": "GB/T 8478-2020 铝合金门窗",
+    "source_url": "https://std.samr.gov.cn/search/std?q=GB/T%208478-2020",
+    "local_path": "raw/GB-T-8478-2020.pdf",
+    "output": "101-GBT-8478-2020-aluminium-windows-doors.md",
+    "category": "material",
+    "priority": 2,
+    "tags": [
+      "门窗",
+      "铝合金",
+      "气密",
+      "水密",
+      "隔声"
+    ],
+    "notes": "铝合金门窗产品标准。适合门窗选购、安装和性能问题。",
+    "download_url": ""
+  }
+]

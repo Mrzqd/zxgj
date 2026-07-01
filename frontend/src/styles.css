@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded-xl border border-ink/10 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-clay focus:ring-4 focus:ring-clay/10;
+  }
+
+  .file-input {
+    @apply w-full rounded-xl border border-dashed border-ink/20 bg-white px-3 py-3 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-ink file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white;
+  }
+
+  .primary-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-clay px-4 py-3 text-sm font-bold text-white shadow-lg shadow-clay/20 transition active:scale-[0.98] disabled:opacity-60;
+  }
+
+  .secondary-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-moss px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-moss/20 transition active:scale-[0.98];
+  }
+
+  .assistant-search-icon {
+    @apply relative grid h-4 w-4 shrink-0 place-items-center text-clay;
+    animation: assistant-search-sweep 1.15s ease-in-out infinite;
+  }
+}
+
+@keyframes assistant-search-sweep {
+  0%,
+  100% {
+    transform: translate(-1px, 1px) rotate(-12deg);
+    opacity: 0.65;
+  }
+
+  45% {
+    transform: translate(2px, -1px) rotate(10deg);
+    opacity: 1;
+  }
+
+  70% {
+    transform: translate(1px, 1px) rotate(4deg);
+    opacity: 0.85;
+  }
+}
