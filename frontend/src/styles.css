@@ -7,6 +7,30 @@
 @layer base {
   * {
     -webkit-tap-highlight-color: transparent;
+    scrollbar-color: rgba(184, 102, 59, 0.55) rgba(21, 18, 13, 0.06);
+    scrollbar-width: thin;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: rgba(21, 18, 13, 0.06);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(184, 102, 59, 0.5);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(184, 102, 59, 0.72);
+    background-clip: content-box;
   }
 
   body {

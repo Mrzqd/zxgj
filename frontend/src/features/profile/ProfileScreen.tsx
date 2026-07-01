@@ -55,9 +55,13 @@ export function ProfileScreen({
   const [progressNote, setProgressNote] = useState(progress?.note || '');
   const [stageModalOpen, setStageModalOpen] = useState(false);
   const [editingStage, setEditingStage] = useState<ProjectStage | null>(null);
+  const [stagesExpanded, setStagesExpanded] = useState(false);
+  const [activityExpanded, setActivityExpanded] = useState(false);
   const inviteSubmit = useSubmitting();
   const progressSubmit = useSubmitting();
   const stageDeleteSubmit = useSubmitting();
+  const visibleStages = stagesExpanded ? stages : stages.slice(0, 3);
+  const visibleActivity = activityExpanded ? activity.slice(0, 20) : activity.slice(0, 3);
 
   useEffect(() => {
     setProgressStage(progress?.current_stage || stages[0]?.value || 'design');
@@ -181,7 +185,7 @@ export function ProfileScreen({
       >
         {loading.stages && <InlineLoading text="装修阶段加载中..." />}
         <div className="space-y-2">
-          {stages.map((stage) => (
+          {visibleStages.map((stage) => (
             <div key={stage.id} className="rounded-xl bg-sand px-3 py-2">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
@@ -208,6 +212,15 @@ export function ProfileScreen({
               </div>
             </div>
           ))}
+          {stages.length > 3 && (
+            <button
+              type="button"
+              onClick={() => setStagesExpanded((current) => !current)}
+              className="w-full rounded-xl bg-sand/70 px-3 py-2 text-xs font-bold text-ink/55"
+            >
+              {stagesExpanded ? '收起装修阶段' : `展开全部 ${stages.length} 个阶段`}
+            </button>
+          )}
         </div>
       </Card>
       <Card title="当前账号" action={user.email}>
@@ -301,7 +314,7 @@ export function ProfileScreen({
       <Card title="操作日志" action={`${activity.length} 条`}>
         {loading.activity && <InlineLoading text="操作日志加载中..." />}
         <div className="space-y-2">
-          {activity.slice(0, 20).map((log) => (
+          {visibleActivity.map((log) => (
             <div key={log.id} className="rounded-xl bg-sand px-3 py-2">
               <div className="flex items-start justify-between gap-3">
                 <p className="text-sm font-semibold">{log.message}</p>
@@ -313,6 +326,15 @@ export function ProfileScreen({
             </div>
           ))}
           {activity.length === 0 && <p className="py-4 text-center text-sm text-ink/45">暂无操作日志</p>}
+          {activity.length > 3 && (
+            <button
+              type="button"
+              onClick={() => setActivityExpanded((current) => !current)}
+              className="w-full rounded-xl bg-sand/70 px-3 py-2 text-xs font-bold text-ink/55"
+            >
+              {activityExpanded ? '收起操作日志' : `展开最近 ${Math.min(activity.length, 20)} 条日志`}
+            </button>
+          )}
         </div>
       </Card>
       <button onClick={onLogout} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-4 py-3 font-semibold text-white">
