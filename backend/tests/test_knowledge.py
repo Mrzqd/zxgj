@@ -17,10 +17,13 @@ from app.api.auth import register
 from app.api.knowledge import (
     _knowledge_event_stream,
     _document_to_read,
+    _load_chat_history,
     ask_knowledge,
+    clear_knowledge_chat_messages,
     delete_knowledge_document,
     download_knowledge_document,
     get_knowledge_document,
+    list_knowledge_chat_messages,
     list_knowledge_documents,
     trigger_knowledge_index,
     update_knowledge_document,
@@ -28,7 +31,7 @@ from app.api.knowledge import (
 )
 from app.api.projects import create_project
 from app.db.session import Base, SessionLocal, engine
-from app.models import KnowledgeChunk, KnowledgeDocument
+from app.models import KnowledgeChatMessage, KnowledgeChunk, KnowledgeDocument
 from app.schemas import KnowledgeAskRequest, KnowledgeDocumentUpdate, ProjectCreate, UserCreate
 from app.services import knowledge
 from app.services.knowledge_jobs import index_knowledge_document
@@ -200,6 +203,121 @@ def test_retrieval_query_falls_back_when_rewrite_fails(monkeypatch):
 
     assert "卫生间闭水试验" in rewritten
     assert "这个怎么验收" in rewritten
+
+
+def test_retrieval_query_does_not_mix_history_for_standalone_question(monkeypatch):
+    monkeypatch.setattr(knowledge, "rewrite_search_query", lambda *args, **kwargs: None)
+
+    rewritten = knowledge.build_retrieval_query(
+        "厨房阴阳角怎么验收",
+        history=[{"role": "user", "content": "卫生间闭水试验怎么验收"}],
+    )
+
+    assert rewritten == "厨房阴阳角怎么验收"
+
+
+def test_knowledge_ask_persists_user_scoped_chat_messages():
+    db = SessionLocal()
+    try:
+        owner_token = register(
+            UserCreate(email="chat-owner@example.com", name="屋主", password="password123"),
+            db,
+        )
+        project = create_project(ProjectCreate(name="新家装修", address="杭州"), db, owner_token.user)
+        _add_knowledge_chunk(
+            db,
+            title="卫生间验收",
+            heading="闭水试验",
+            content="卫生间闭水试验应蓄水观察，并检查楼下顶面是否渗漏。",
+            project_id=project.id,
+        )
+        db.commit()
+
+        ask_knowledge(
+            project.id,
+            KnowledgeAskRequest(question="卫生间闭水试验怎么验收"),
+            db,
+            owner_token.user,
+        )
+
+        owner_messages = list_knowledge_chat_messages(project.id, db, owner_token.user)
+        other_token = register(
+            UserCreate(email="chat-other@example.com", name="家人", password="password123"),
+            db,
+        )
+        other_message_count = (
+            db.query(KnowledgeChatMessage)
+            .filter(
+                KnowledgeChatMessage.project_id == project.id,
+                KnowledgeChatMessage.user_id == other_token.user.id,
+            )
+            .count()
+        )
+
+        assert [message.role for message in owner_messages] == ["user", "assistant"]
+        assert owner_messages[0].content == "卫生间闭水试验怎么验收"
+        assert "闭水" in owner_messages[1].content
+        assert owner_messages[1].sources
+        assert other_message_count == 0
+
+        clear_knowledge_chat_messages(project.id, db, owner_token.user)
+        assert list_knowledge_chat_messages(project.id, db, owner_token.user) == []
+    finally:
+        db.close()
+
+
+def test_knowledge_ask_builds_history_from_database_not_request_payload(monkeypatch):
+    db = SessionLocal()
+    captured = {}
+    try:
+        token = register(
+            UserCreate(email="history-db@example.com", name="屋主", password="password123"),
+            db,
+        )
+        project = create_project(ProjectCreate(name="新家装修", address="杭州"), db, token.user)
+        db.add(
+            KnowledgeChatMessage(
+                project_id=project.id,
+                user_id=token.user.id,
+                role="user",
+                content="卫生间闭水试验",
+                sources=[],
+            )
+        )
+        db.add(
+            KnowledgeChatMessage(
+                project_id=project.id,
+                user_id=token.user.id,
+                role="assistant",
+                content="闭水试验要观察渗漏。",
+                sources=[],
+            )
+        )
+        db.commit()
+
+        def fake_build_rag_answer(db, question, project_id, history=None):
+            captured["history"] = history
+            return "ok", []
+
+        monkeypatch.setattr("app.api.knowledge.build_rag_answer", fake_build_rag_answer)
+
+        ask_knowledge(
+            project.id,
+            KnowledgeAskRequest(question="这个怎么验收"),
+            db,
+            token.user,
+        )
+
+        assert captured["history"] == [
+            {"role": "user", "content": "卫生间闭水试验"},
+            {"role": "assistant", "content": "闭水试验要观察渗漏。"},
+        ]
+        assert _load_chat_history(db, project.id, token.user.id)[-2:] == [
+            {"role": "user", "content": "这个怎么验收"},
+            {"role": "assistant", "content": "ok"},
+        ]
+    finally:
+        db.close()
 
 
 def test_projection_embedding_is_deterministic_and_uses_index_dimensions(monkeypatch):
@@ -955,6 +1073,7 @@ def test_stream_knowledge_answer_emits_status_sources_and_answer():
             project.id,
             KnowledgeAskRequest(question="卫生间闭水试验怎么验收"),
             db,
+            token.user.id,
         ))
 
         assert "event: status" in body
@@ -963,5 +1082,6 @@ def test_stream_knowledge_answer_emits_status_sources_and_answer():
         assert "event: delta" in body
         assert "event: done" in body
         assert "闭水" in body
+        assert db.query(KnowledgeChatMessage).filter(KnowledgeChatMessage.project_id == project.id).count() == 2
     finally:
         db.close()

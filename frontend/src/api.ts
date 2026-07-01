@@ -7,7 +7,7 @@ import type {
   Expense,
   Inspection,
   KnowledgeAnswer,
-  KnowledgeChatHistoryMessage,
+  KnowledgeChatMessage,
   KnowledgeDocument,
   KnowledgeIndexTrigger,
   KnowledgeSource,
@@ -364,6 +364,15 @@ export const api = {
   listKnowledgeDocuments(token: string, projectId: number) {
     return request<KnowledgeDocument[]>(`/projects/${projectId}/knowledge/documents`, { token });
   },
+  listKnowledgeChatMessages(token: string, projectId: number) {
+    return request<KnowledgeChatMessage[]>(`/projects/${projectId}/knowledge/chat/messages`, { token });
+  },
+  clearKnowledgeChatMessages(token: string, projectId: number) {
+    return request<void>(`/projects/${projectId}/knowledge/chat/messages`, {
+      method: 'DELETE',
+      token,
+    });
+  },
   triggerKnowledgeIndex(token: string, projectId: number) {
     return request<KnowledgeIndexTrigger>(`/projects/${projectId}/knowledge/index`, {
       method: 'POST',
@@ -373,18 +382,17 @@ export const api = {
   getKnowledgeDocument(token: string, projectId: number, documentId: number) {
     return request<KnowledgeDocument>(`/projects/${projectId}/knowledge/documents/${documentId}`, { token });
   },
-  askKnowledge(token: string, projectId: number, question: string, history: KnowledgeChatHistoryMessage[] = []) {
+  askKnowledge(token: string, projectId: number, question: string) {
     return request<KnowledgeAnswer>(`/projects/${projectId}/knowledge/ask`, {
       method: 'POST',
       token,
-      body: JSON.stringify({ question, history }),
+      body: JSON.stringify({ question }),
     });
   },
   streamKnowledgeAnswer(
     token: string,
     projectId: number,
     question: string,
-    history: KnowledgeChatHistoryMessage[] = [],
     onEvent: (event: KnowledgeStreamEvent) => void,
   ) {
     return streamRequest(
@@ -392,7 +400,7 @@ export const api = {
       {
         method: 'POST',
         token,
-        body: JSON.stringify({ question, history }),
+        body: JSON.stringify({ question }),
       },
       onEvent,
     );

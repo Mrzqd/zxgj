@@ -310,14 +310,8 @@ class ProjectStageRead(BaseModel):
     created_at: datetime
 
 
-class KnowledgeChatMessage(BaseModel):
-    role: str = Field(pattern="^(user|assistant)$")
-    content: str = Field(min_length=1, max_length=2000)
-
-
 class KnowledgeAskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=500)
-    history: list[KnowledgeChatMessage] = Field(default_factory=list, max_length=12)
 
 
 class KnowledgeDocumentUpdate(BaseModel):
@@ -359,6 +353,14 @@ class KnowledgeSourceRead(BaseModel):
     text: str
     download_url: str
     score: float
+
+
+class KnowledgeChatMessageRead(BaseModel):
+    id: int
+    role: str = Field(pattern="^(user|assistant)$")
+    content: str
+    sources: list[KnowledgeSourceRead] = Field(default_factory=list)
+    created_at: datetime
 
 
 class KnowledgeAnswerRead(BaseModel):

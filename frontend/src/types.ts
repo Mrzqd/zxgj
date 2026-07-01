@@ -203,7 +203,10 @@ export type KnowledgeAnswer = {
   documents: KnowledgeDocument[];
 };
 
-export type KnowledgeChatHistoryMessage = {
+export type KnowledgeChatMessage = {
+  id: number;
   role: 'user' | 'assistant';
   content: string;
+  sources: KnowledgeSource[];
+  created_at: string;
 };

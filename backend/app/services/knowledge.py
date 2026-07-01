@@ -36,6 +36,10 @@ CHINESE_ARTICLE_RE = re.compile(r"^第[一二三四五六七八九十百千0-9]+
 NUMBERED_CLAUSE_RE = re.compile(r"^\d+(?:\.\d+){2,6}\s*.+")
 NUMBERED_HEADING_RE = re.compile(r"^\d+(?:\.\d+)?\s+[\u4e00-\u9fffA-Za-z].{0,80}$")
 LIST_ITEM_RE = re.compile(r"^(?:[-*+]\s+|[（(]?[一二三四五六七八九十]+[）)、.]|[（(]?\d{1,3}[）)、.]|[a-zA-Z][.)、])\s*.+")
+CONTEXT_REFERENCE_RE = re.compile(r"(这个|那个|上面|刚才|前面|继续|它|其)")
+CONTEXT_SHORT_QUESTION_RE = re.compile(
+    r"^(怎么做|怎么验|怎么验收|怎么处理|怎么整改|什么意思|还有吗|呢|吗|怎样|展开|详细|具体)$"
+)
 _BUILTIN_SYNC_KEYS: set[str] = set()
 _INDEXED_SCOPE_KEYS: set[tuple[int | None, str]] = set()
 _BUILTIN_SIGNATURE_CACHE: str | None = None
@@ -108,8 +112,19 @@ def _clean_text(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def _is_contextual_question(question: str) -> bool:
+    cleaned = _clean_text(question)
+    if not cleaned:
+        return False
+    if CONTEXT_REFERENCE_RE.search(cleaned):
+        return True
+    return bool(CONTEXT_SHORT_QUESTION_RE.fullmatch(cleaned))
+
+
 def _fallback_retrieval_query(question: str, history: list[dict[str, str]] | None = None) -> str:
     history = history or []
+    if not _is_contextual_question(question):
+        return question
     recent_user_messages = [
         message.get("content", "").strip()
         for message in history[-6:]

@@ -4,8 +4,10 @@ from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from fastapi.responses import Response, StreamingResponse
 
 from app.api.deps import CurrentUser, DbSession, require_project_member
+from app.models import KnowledgeChatMessage
 from app.schemas import (
     KnowledgeAnswerRead,
+    KnowledgeChatMessageRead,
     KnowledgeAskRequest,
     KnowledgeDocumentRead,
     KnowledgeDocumentUpdate,
@@ -29,6 +31,65 @@ from app.services.knowledge import (
 )
 
 router = APIRouter(prefix="/projects/{project_id}/knowledge", tags=["knowledge"])
+
+MAX_CONTEXT_MESSAGES = 10
+MAX_CONTEXT_CHARS = 2000
+
+
+def _stored_sources(sources: list[KnowledgeSourceRead]) -> list[dict]:
+    return [source.model_dump(mode="json") for source in sources]
+
+
+def _chat_message_to_read(message: KnowledgeChatMessage) -> KnowledgeChatMessageRead:
+    return KnowledgeChatMessageRead(
+        id=message.id,
+        role=message.role,
+        content=message.content,
+        sources=message.sources or [],
+        created_at=message.created_at,
+    )
+
+
+def _save_chat_turn(
+    db: DbSession,
+    project_id: int,
+    user_id: int,
+    question: str,
+    answer: str,
+    sources: list[KnowledgeSourceRead],
+) -> None:
+    db.add(
+        KnowledgeChatMessage(
+            project_id=project_id,
+            user_id=user_id,
+            role="user",
+            content=question,
+            sources=[],
+        )
+    )
+    db.add(
+        KnowledgeChatMessage(
+            project_id=project_id,
+            user_id=user_id,
+            role="assistant",
+            content=answer,
+            sources=_stored_sources(sources),
+        )
+    )
+
+
+def _load_chat_history(db: DbSession, project_id: int, user_id: int) -> list[dict[str, str]]:
+    messages = (
+        db.query(KnowledgeChatMessage)
+        .filter(KnowledgeChatMessage.project_id == project_id, KnowledgeChatMessage.user_id == user_id)
+        .order_by(KnowledgeChatMessage.created_at.desc(), KnowledgeChatMessage.id.desc())
+        .limit(MAX_CONTEXT_MESSAGES)
+        .all()
+    )
+    return [
+        {"role": message.role, "content": message.content[:MAX_CONTEXT_CHARS]}
+        for message in reversed(messages)
+    ]
 
 
 def _document_to_read(document, project_id: int, include_content: bool = False) -> KnowledgeDocumentRead:
@@ -63,6 +124,31 @@ def _source_to_read(result: RetrievedChunk, project_id: int) -> KnowledgeSourceR
 def _stream_event(event: str, data: dict | str) -> str:
     payload = data if isinstance(data, str) else json.dumps(data, ensure_ascii=False)
     return f"event: {event}\ndata: {payload}\n\n"
+
+
+@router.get("/chat/messages", response_model=list[KnowledgeChatMessageRead])
+def list_knowledge_chat_messages(project_id: int, db: DbSession, user: CurrentUser, limit: int = 60):
+    require_project_member(db, project_id, user)
+    bounded_limit = max(1, min(limit, 200))
+    messages = (
+        db.query(KnowledgeChatMessage)
+        .filter(KnowledgeChatMessage.project_id == project_id, KnowledgeChatMessage.user_id == user.id)
+        .order_by(KnowledgeChatMessage.created_at.desc(), KnowledgeChatMessage.id.desc())
+        .limit(bounded_limit)
+        .all()
+    )
+    return [_chat_message_to_read(message) for message in reversed(messages)]
+
+
+@router.delete("/chat/messages", status_code=status.HTTP_204_NO_CONTENT)
+def clear_knowledge_chat_messages(project_id: int, db: DbSession, user: CurrentUser):
+    require_project_member(db, project_id, user)
+    db.query(KnowledgeChatMessage).filter(
+        KnowledgeChatMessage.project_id == project_id,
+        KnowledgeChatMessage.user_id == user.id,
+    ).delete(synchronize_session=False)
+    db.commit()
+    return None
 
 
 @router.get("/documents", response_model=list[KnowledgeDocumentRead])
@@ -159,17 +245,20 @@ def download_knowledge_document(project_id: int, document_id: int, db: DbSession
 @router.post("/ask", response_model=KnowledgeAnswerRead)
 def ask_knowledge(project_id: int, payload: KnowledgeAskRequest, db: DbSession, user: CurrentUser):
     require_project_member(db, project_id, user)
+    history = _load_chat_history(db, project_id, user.id)
     answer, results = build_rag_answer(
         db,
         payload.question,
         project_id,
-        history=[message.model_dump() for message in payload.history],
+        history=history,
     )
+    sources = [_source_to_read(result, project_id) for result in results]
+    _save_chat_turn(db, project_id, user.id, payload.question, answer, sources)
     db.commit()
     documents_by_id = {result.chunk.document.id: result.chunk.document for result in results}
     return KnowledgeAnswerRead(
         answer=answer,
-        sources=[_source_to_read(result, project_id) for result in results],
+        sources=sources,
         documents=[_document_to_read(document, project_id) for document in documents_by_id.values()],
     )
 
@@ -178,29 +267,31 @@ def ask_knowledge(project_id: int, payload: KnowledgeAskRequest, db: DbSession, 
 def stream_knowledge_answer(project_id: int, payload: KnowledgeAskRequest, db: DbSession, user: CurrentUser):
     require_project_member(db, project_id, user)
     return StreamingResponse(
-        _knowledge_event_stream(project_id, payload, db),
+        _knowledge_event_stream(project_id, payload, db, user.id),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
 
-def _knowledge_event_stream(project_id: int, payload: KnowledgeAskRequest, db: DbSession):
-    history = [message.model_dump() for message in payload.history]
+def _knowledge_event_stream(project_id: int, payload: KnowledgeAskRequest, db: DbSession, user_id: int):
+    history = _load_chat_history(db, project_id, user_id)
     try:
         yield _stream_event("status", {"message": "正在理解问题..."})
-        if payload.history:
+        if history:
             yield _stream_event("status", {"message": "正在理解上下文..."})
         yield _stream_event("status", {"message": "正在查找知识库文档..."})
         rag_context = build_rag_context(db, payload.question, project_id, history=history)
-        sources = [_source_to_read(result, project_id).model_dump(mode="json") for result in rag_context.results]
-        yield _stream_event("sources", {"sources": sources})
+        source_reads = [_source_to_read(result, project_id) for result in rag_context.results]
+        source_payload = _stored_sources(source_reads)
+        yield _stream_event("sources", {"sources": source_payload})
 
         if not rag_context.results:
             answer = build_indexing_answer() if rag_context.has_pending_documents else build_no_results_answer()
             yield _stream_event("status", {"message": "知识库正在索引" if rag_context.has_pending_documents else "没有找到足够相关的资料"})
             yield _stream_event("delta", {"text": answer})
-            yield _stream_event("done", {"answer": answer})
+            _save_chat_turn(db, project_id, user_id, payload.question, answer, source_reads)
             db.commit()
+            yield _stream_event("done", {"answer": answer})
             return
 
         yield _stream_event("status", {"message": "正在生成回答..."})
@@ -215,8 +306,9 @@ def _knowledge_event_stream(project_id: int, payload: KnowledgeAskRequest, db: D
             yield _stream_event("delta", {"text": fallback})
 
         answer = "".join(answer_parts).strip()
-        yield _stream_event("done", {"answer": answer})
+        _save_chat_turn(db, project_id, user_id, payload.question, answer, source_reads)
         db.commit()
+        yield _stream_event("done", {"answer": answer})
     except HTTPException as exc:
         db.rollback()
         yield _stream_event("error", {"message": str(exc.detail)})

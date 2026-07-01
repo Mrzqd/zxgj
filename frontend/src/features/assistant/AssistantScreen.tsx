@@ -3,7 +3,7 @@ import { Bot, Download, FileText, Pencil, RefreshCw, Search, Send, Settings, Tra
 import { api } from '../../api';
 import { EmptyLine, Field, Modal, Tip } from '../../components/ui';
 import { useSubmitting } from '../../hooks/useSubmitting';
-import type { KnowledgeAnswer, KnowledgeChatHistoryMessage, KnowledgeDocument, KnowledgeSource } from '../../types';
+import type { KnowledgeChatMessage, KnowledgeDocument, KnowledgeSource } from '../../types';
 
 type ChatMessage = {
   id: string;
@@ -18,9 +18,6 @@ const WELCOME_MESSAGE: ChatMessage = {
   content: '我是装修助手。可以问验收、采购、预算、工期和注意事项。我会优先检索知识库，并附上引用来源。',
 };
 
-const MAX_STORED_MESSAGES = 60;
-const MAX_HISTORY_MESSAGES = 10;
-
 const QUICK_QUESTIONS = [
   '卫生间闭水试验怎么验收？',
   '水电打压要注意什么？',
@@ -33,7 +30,7 @@ export function AssistantScreen({ token, projectId }: { token: string; projectId
   const [question, setQuestion] = useState('');
   const [chatState, setChatState] = useState(() => ({
     projectId,
-    messages: loadStoredMessages(projectId),
+    messages: [WELCOME_MESSAGE],
   }));
   const [notice, setNotice] = useState<string | null>(null);
   const [asking, setAsking] = useState(false);
@@ -64,17 +61,28 @@ export function AssistantScreen({ token, projectId }: { token: string; projectId
   }, [token, projectId]);
 
   useEffect(() => {
+    let cancelled = false;
     setChatState({
       projectId,
-      messages: loadStoredMessages(projectId),
+      messages: [WELCOME_MESSAGE],
     });
     setNotice(null);
-  }, [projectId]);
-
-  useEffect(() => {
-    if (chatState.projectId !== projectId) return;
-    saveStoredMessages(projectId, chatState.messages);
-  }, [projectId, chatState]);
+    api.listKnowledgeChatMessages(token, projectId)
+      .then((result) => {
+        if (cancelled) return;
+        setChatState({
+          projectId,
+          messages: toChatMessages(result),
+        });
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setNotice(error instanceof Error ? error.message : '聊天记录加载失败');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token, projectId]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -92,15 +100,14 @@ export function AssistantScreen({ token, projectId }: { token: string; projectId
       setQuestion('');
       setAsking(true);
       setStreamStatus('正在理解问题...');
-      const history = toRequestHistory(messages);
       const assistantMessageId = `a-${Date.now()}`;
       setMessages((current) => [
-        ...trimStoredMessages(current),
+        ...withoutWelcome(current),
         { id: `q-${Date.now()}`, role: 'user', content: trimmed },
         { id: assistantMessageId, role: 'assistant', content: '' },
       ]);
       try {
-        await api.streamKnowledgeAnswer(token, projectId, trimmed, history, (event) => {
+        await api.streamKnowledgeAnswer(token, projectId, trimmed, (event) => {
           if (event.event === 'status') {
             setStreamStatus(event.data.message);
             return;
@@ -214,7 +221,11 @@ export function AssistantScreen({ token, projectId }: { token: string; projectId
 
   function clearMessages() {
     if (!window.confirm('确认清空当前项目的聊天记录？')) return;
-    setMessages([WELCOME_MESSAGE]);
+    guard(async () => {
+      await api.clearKnowledgeChatMessages(token, projectId);
+      setMessages([WELCOME_MESSAGE]);
+      setNotice('聊天记录已清空');
+    });
   }
 
   return (
@@ -332,66 +343,28 @@ export function AssistantScreen({ token, projectId }: { token: string; projectId
   );
 }
 
-function chatStorageKey(projectId: number) {
-  return `renovation_assistant_messages_${projectId}`;
+function toChatMessages(messages: KnowledgeChatMessage[]): ChatMessage[] {
+  if (messages.length === 0) return [WELCOME_MESSAGE];
+  return messages.map((message) => ({
+    id: `db-${message.id}`,
+    role: message.role,
+    content: message.content,
+    sources: message.sources,
+  }));
 }
 
-function isChatMessage(value: unknown): value is ChatMessage {
-  if (!value || typeof value !== 'object') return false;
-  const item = value as Partial<ChatMessage>;
-  return (
-    typeof item.id === 'string'
-    && (item.role === 'assistant' || item.role === 'user')
-    && typeof item.content === 'string'
-  );
-}
-
-function loadStoredMessages(projectId: number): ChatMessage[] {
-  try {
-    const raw = localStorage.getItem(chatStorageKey(projectId));
-    if (!raw) return [WELCOME_MESSAGE];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [WELCOME_MESSAGE];
-    const messages = parsed.filter(isChatMessage).slice(-MAX_STORED_MESSAGES);
-    return messages.length ? messages : [WELCOME_MESSAGE];
-  } catch {
-    return [WELCOME_MESSAGE];
-  }
-}
-
-function saveStoredMessages(projectId: number, messages: ChatMessage[]) {
-  const nextMessages = trimStoredMessages(messages);
-  localStorage.setItem(chatStorageKey(projectId), JSON.stringify(nextMessages));
-}
-
-function trimStoredMessages(messages: ChatMessage[]) {
-  const welcome = messages.find((message) => message.id === WELCOME_MESSAGE.id) || WELCOME_MESSAGE;
-  const rest = messages.filter((message) => message.id !== WELCOME_MESSAGE.id).slice(-(MAX_STORED_MESSAGES - 1));
-  return [welcome, ...rest];
+function withoutWelcome(messages: ChatMessage[]) {
+  return messages.filter((message) => message.id !== WELCOME_MESSAGE.id);
 }
 
 function updateMessage(messages: ChatMessage[], id: string, patch: Partial<ChatMessage>) {
-  return trimStoredMessages(
-    messages.map((message) => (message.id === id ? { ...message, ...patch } : message)),
-  );
+  return messages.map((message) => (message.id === id ? { ...message, ...patch } : message));
 }
 
 function appendMessageContent(messages: ChatMessage[], id: string, text: string) {
-  return trimStoredMessages(
-    messages.map((message) => (
-      message.id === id ? { ...message, content: `${message.content}${text}` } : message
-    )),
-  );
-}
-
-function toRequestHistory(messages: ChatMessage[]): KnowledgeChatHistoryMessage[] {
-  return messages
-    .filter((message) => message.id !== WELCOME_MESSAGE.id && (message.role === 'user' || message.role === 'assistant'))
-    .slice(-MAX_HISTORY_MESSAGES)
-    .map((message) => ({
-      role: message.role,
-      content: message.content,
-    }));
+  return messages.map((message) => (
+    message.id === id ? { ...message, content: `${message.content}${text}` } : message
+  ));
 }
 
 function ChatBubble({
