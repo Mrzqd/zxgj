@@ -38,6 +38,7 @@ MinIO 控制台：http://localhost:9001
 ```
 
 MinIO 默认账号密码均为 `minioadmin`，附件 bucket 为 `renovation-assets`。
+附件通过前端 Nginx 同源反代访问，默认路径为 `/renovation-assets/...`，浏览器无需直连 MinIO API 端口。
 
 ## AI 知识库配置
 

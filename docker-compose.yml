@@ -22,7 +22,6 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"
       - "9001:9001"
     volumes:
       - minio-data:/data
@@ -64,7 +63,7 @@ services:
       CORS_ORIGINS: http://localhost,http://127.0.0.1,http://localhost:5173,http://127.0.0.1:5173
       S3_BUCKET: renovation-assets
       S3_ENDPOINT_URL: http://minio:9000
-      S3_PUBLIC_BASE_URL: http://localhost:9000/renovation-assets
+      S3_PUBLIC_BASE_URL: /renovation-assets
       AWS_ACCESS_KEY_ID: minioadmin
       AWS_SECRET_ACCESS_KEY: minioadmin
       AWS_REGION: ${AWS_REGION:-us-east-1}
