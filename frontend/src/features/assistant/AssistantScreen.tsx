@@ -247,7 +247,7 @@ export function AssistantScreen({ token, projectId }: { token: string; projectId
             </button>
           </div>
         </div>
-        <Tip message={notice} onClose={() => setNotice(null)} tone="info" className="mt-2" />
+        <Tip message={notice} onClose={() => setNotice(null)} tone="info" />
       </header>
 
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-3">

@@ -348,7 +348,7 @@ export function App() {
         style={{ transform: pullRefreshOffset > 0 ? `translateY(${pullRefreshOffset}px)` : undefined }}
       >
         <PullRefreshIndicator state={pullRefreshState} offset={pullRefreshOffset} />
-        <Tip message={message} onClose={() => setMessage(null)} tone="info" className="mx-3 mt-3" />
+        <Tip message={message} onClose={() => setMessage(null)} tone="info" />
         {!currentProject ? (
           <ProjectEmpty token={token} onCreated={refreshProjects} />
         ) : (

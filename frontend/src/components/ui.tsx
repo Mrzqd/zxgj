@@ -141,7 +141,9 @@ export function Tip({
     : 'border-moss/20 bg-moss/10 text-moss';
 
   return (
-    <div className={`rounded-xl border px-3 py-2 text-xs font-semibold shadow-sm ${toneClass} ${className}`}>
+    <div
+      className={`pointer-events-none fixed left-1/2 top-4 z-50 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 rounded-xl border px-3 py-2 text-center text-xs font-semibold shadow-card backdrop-blur ${toneClass} ${className}`}
+    >
       {message}
     </div>
   );

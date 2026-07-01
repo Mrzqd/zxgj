@@ -163,7 +163,7 @@ export function HomeScreen({
         }
       >
         {loading.todos && <InlineLoading text="待办数据加载中..." />}
-        <Tip message={actionError} onClose={() => setActionError(null)} tone="error" className="mb-2" />
+        <Tip message={actionError} onClose={() => setActionError(null)} tone="error" />
         <div className="mb-2 grid grid-cols-3 gap-2 text-xs font-semibold">
           {[
             ['open', `待处理 ${openTodos.length}`],
@@ -246,7 +246,7 @@ export function HomeScreen({
       )}
       <Card title="当前阶段事项" action={labelOf(data.stages, currentStage)}>
         {loading.stageTasks && <InlineLoading text="当前阶段事项加载中..." />}
-        <Tip message={stageTaskError} onClose={() => setStageTaskError(null)} tone="error" className="mb-2" />
+        <Tip message={stageTaskError} onClose={() => setStageTaskError(null)} tone="error" />
         <div className="space-y-3">
           {visibleStageTasks.map((task) => (
             <div key={task.id} className="rounded-2xl border border-ink/10 bg-white px-4 py-3">

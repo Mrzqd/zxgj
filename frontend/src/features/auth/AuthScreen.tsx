@@ -91,7 +91,7 @@ export function AuthScreen({
                 className="input"
               />
             </Field>
-            <Tip message={message} onClose={() => setMessage(null)} tone="error" className="mb-4" />
+            <Tip message={message} onClose={() => setMessage(null)} tone="error" />
             <button disabled={submitting} className="primary-button w-full">
               {submitting ? '处理中...' : mode === 'login' ? '进入管家' : '创建账号'}
             </button>
