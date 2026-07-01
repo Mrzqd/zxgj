@@ -59,6 +59,25 @@ class MemberInvite(BaseModel):
     role: str = "editor"
 
 
+class ProjectInviteLinkCreate(BaseModel):
+    role: str = "editor"
+    expires_in_hours: int = Field(default=72, ge=1, le=720)
+    max_accepts: int = Field(default=1, ge=1, le=100)
+
+
+class ProjectInviteLinkRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    project_id: int
+    token: str
+    role: str
+    max_accepts: int
+    accepted_count: int
+    expires_at: datetime
+    created_at: datetime
+
+
 class ProjectMemberRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

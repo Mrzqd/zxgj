@@ -8,10 +8,12 @@ export function AuthScreen({
   onAuth,
   message,
   setMessage,
+  invitePending,
 }: {
   onAuth: (token: string, user: User) => void;
   message: string | null;
   setMessage: (message: string | null) => void;
+  invitePending?: boolean;
 }) {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
@@ -43,7 +45,9 @@ export function AuthScreen({
             <p className="text-sm font-semibold tracking-[0.28em] text-moss">RENOVATION</p>
             <h1 className="mt-3 font-display text-5xl font-black leading-tight">装修管家</h1>
             <p className="mt-4 text-base leading-7 text-ink/70">
-              一套给家装现场用的协作账本：记钱、排事项、验收、比价和待办集中管理。
+              {invitePending
+                ? '登录或注册后即可接收项目邀请，加入后共同管理装修事项。'
+                : '一套给家装现场用的协作账本：记钱、排事项、验收、比价和待办集中管理。'}
             </p>
           </div>
           <form onSubmit={submit} className="rounded-[2rem] border border-white/70 bg-white/65 p-5 shadow-card backdrop-blur">

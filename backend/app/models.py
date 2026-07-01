@@ -53,6 +53,9 @@ class Project(Base):
     members: Mapped[list["ProjectMember"]] = relationship(
         back_populates="project", cascade="all, delete-orphan"
     )
+    invite_links: Mapped[list["ProjectInviteLink"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
 
 
 class ProjectMember(Base):
@@ -67,6 +70,23 @@ class ProjectMember(Base):
 
     project: Mapped["Project"] = relationship(back_populates="members")
     user: Mapped["User"] = relationship(back_populates="projects")
+
+
+class ProjectInviteLink(Base):
+    __tablename__ = "project_invite_links"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), nullable=False, index=True)
+    token: Mapped[str] = mapped_column(String(120), unique=True, index=True, nullable=False)
+    role: Mapped[ProjectRole] = mapped_column(String(20), default=ProjectRole.editor.value)
+    max_accepts: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    accepted_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    created_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    project: Mapped["Project"] = relationship(back_populates="invite_links")
+    created_by: Mapped["User"] = relationship()
 
 
 class Attachment(Base):

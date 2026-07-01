@@ -42,6 +42,10 @@ const emptyDataLoading: DataLoading = {
 const allDataLoadingKeys = Object.keys(emptyDataLoading) as DataLoadingKey[];
 
 export function App() {
+  const [pendingInviteToken, setPendingInviteToken] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('invite') || localStorage.getItem('renovation_pending_invite');
+  });
   const [token, setToken] = useState(() => localStorage.getItem('renovation_token'));
   const [user, setUser] = useState<User | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -71,7 +75,17 @@ export function App() {
     }
   }
 
-  async function refreshProjects(activeToken = token) {
+  function clearPendingInvite() {
+    localStorage.removeItem('renovation_pending_invite');
+    setPendingInviteToken(null);
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('invite')) {
+      url.searchParams.delete('invite');
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+  }
+
+  async function refreshProjects(activeToken = token, preferredProjectId?: number) {
     if (!activeToken) return;
     const [projectList, metaOptions] = await Promise.all([
       api.listProjects(activeToken),
@@ -79,6 +93,11 @@ export function App() {
     ]);
     setProjects(projectList);
     setMeta(metaOptions);
+    if (preferredProjectId && projectList.some((project) => project.id === preferredProjectId)) {
+      setProjectId(preferredProjectId);
+      localStorage.setItem('renovation_project_id', String(preferredProjectId));
+      return;
+    }
     if (!projectId && projectList[0]) {
       setProjectId(projectList[0].id);
       localStorage.setItem('renovation_project_id', String(projectList[0].id));
@@ -200,7 +219,20 @@ export function App() {
     withErrorHandling(async () => {
       const profile = await api.me(token);
       setUser(profile);
-      await refreshProjects(token);
+      let acceptedProjectId: number | undefined;
+      if (pendingInviteToken) {
+        localStorage.setItem('renovation_pending_invite', pendingInviteToken);
+        try {
+          const member = await api.acceptProjectInviteLink(token, pendingInviteToken);
+          acceptedProjectId = member.project_id;
+          setMessage('已加入邀请项目');
+        } catch (error) {
+          setMessage(error instanceof Error ? error.message : '邀请链接接收失败');
+        } finally {
+          clearPendingInvite();
+        }
+      }
+      await refreshProjects(token, acceptedProjectId);
     }).finally(() => setLoading(false));
   }, [token]);
 
@@ -213,6 +245,9 @@ export function App() {
 
   function handleAuth(authToken: string, profile: User) {
     localStorage.setItem('renovation_token', authToken);
+    if (pendingInviteToken) {
+      localStorage.setItem('renovation_pending_invite', pendingInviteToken);
+    }
     setToken(authToken);
     setUser(profile);
   }
@@ -228,7 +263,14 @@ export function App() {
   }
 
   if (!token || !user) {
-    return <AuthScreen onAuth={handleAuth} message={message} setMessage={setMessage} />;
+    return (
+      <AuthScreen
+        onAuth={handleAuth}
+        message={message}
+        setMessage={setMessage}
+        invitePending={Boolean(pendingInviteToken)}
+      />
+    );
   }
 
   if (loading) {

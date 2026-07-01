@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Edit3, LogOut, Plus, Trash2, Users } from 'lucide-react';
+import { Copy, Edit3, Link, LogOut, Plus, Trash2, Users } from 'lucide-react';
 import { api } from '../../api';
 import { Card, Field, InlineLoading, Modal, ModuleHero } from '../../components/ui';
 import { useSubmitting } from '../../hooks/useSubmitting';
-import type { ActivityLog, Expense, Project, ProjectMember, ProjectProgress, ProjectStage, User } from '../../types';
+import type { ActivityLog, Expense, Project, ProjectInviteLink, ProjectMember, ProjectProgress, ProjectStage, User } from '../../types';
 import { dateText, labelOf } from '../../utils/format';
 
 export function ProfileScreen({
@@ -46,8 +46,11 @@ export function ProfileScreen({
   onRefreshStages: () => Promise<void>;
   onLogout: () => void;
 }) {
-  const [email, setEmail] = useState('');
   const [message, setMessage] = useState<string | null>(null);
+  const [inviteLinks, setInviteLinks] = useState<ProjectInviteLink[]>([]);
+  const [inviteExpiresInHours, setInviteExpiresInHours] = useState('72');
+  const [inviteMaxAccepts, setInviteMaxAccepts] = useState('1');
+  const [generatedInviteUrl, setGeneratedInviteUrl] = useState('');
   const [progressStage, setProgressStage] = useState(progress?.current_stage || stages[0]?.value || 'design');
   const [progressNote, setProgressNote] = useState(progress?.note || '');
   const [stageModalOpen, setStageModalOpen] = useState(false);
@@ -61,18 +64,44 @@ export function ProfileScreen({
     setProgressNote(progress?.note || '');
   }, [progress?.current_stage, progress?.note, stages]);
 
-  async function submit(event: React.FormEvent) {
+  useEffect(() => {
+    api.listProjectInviteLinks(token, project.id)
+      .then(setInviteLinks)
+      .catch(() => setInviteLinks([]));
+  }, [token, project.id]);
+
+  async function createInviteLink(event: React.FormEvent) {
     event.preventDefault();
     await inviteSubmit.guard(async () => {
       try {
         setMessage(null);
-        await api.inviteMember(token, project.id, { email, role: 'editor' });
-        setEmail('');
+        const invite = await api.createProjectInviteLink(token, project.id, {
+          role: 'editor',
+          expires_in_hours: Number(inviteExpiresInHours),
+          max_accepts: Number(inviteMaxAccepts),
+        });
+        setGeneratedInviteUrl(inviteUrl(invite.token));
+        const links = await api.listProjectInviteLinks(token, project.id);
+        setInviteLinks(links);
         await onInvite();
+        setMessage('邀请链接已生成');
       } catch (error) {
-        setMessage(error instanceof Error ? error.message : '邀请失败');
+        setMessage(error instanceof Error ? error.message : '邀请链接生成失败');
       }
     });
+  }
+
+  async function copyInviteUrl(url: string) {
+    try {
+      await navigator.clipboard.writeText(url);
+      setMessage('邀请链接已复制');
+    } catch {
+      setMessage(url);
+    }
+  }
+
+  function inviteUrl(inviteToken: string) {
+    return `${window.location.origin}${window.location.pathname}?invite=${encodeURIComponent(inviteToken)}`;
   }
 
   async function saveProgress() {
@@ -198,14 +227,76 @@ export function ProfileScreen({
           ))}
         </div>
       </Card>
-      <Card title="邀请成员" action="邮箱">
-        <form onSubmit={submit} className="space-y-2">
-          <input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required className="input" />
+      <Card title="邀请成员" action="链接">
+        <form onSubmit={createInviteLink} className="space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="有效期">
+              <select
+                value={inviteExpiresInHours}
+                onChange={(event) => setInviteExpiresInHours(event.target.value)}
+                className="input"
+              >
+                <option value="24">24 小时</option>
+                <option value="72">3 天</option>
+                <option value="168">7 天</option>
+                <option value="720">30 天</option>
+              </select>
+            </Field>
+            <Field label="接收次数">
+              <input
+                type="number"
+                min={1}
+                max={100}
+                value={inviteMaxAccepts}
+                onChange={(event) => setInviteMaxAccepts(event.target.value)}
+                required
+                className="input"
+              />
+            </Field>
+          </div>
           {message && <p className="text-sm text-clay">{message}</p>}
           <button disabled={inviteSubmit.submitting} className="secondary-button w-full">
-            {inviteSubmit.submitting ? '邀请中...' : '邀请加入'}
+            <Link className="h-4 w-4" />
+            {inviteSubmit.submitting ? '生成中...' : '生成邀请链接'}
           </button>
         </form>
+        {generatedInviteUrl && (
+          <div className="mt-3 rounded-xl bg-sand p-3">
+            <p className="mb-2 break-all text-xs font-semibold text-ink/65">{generatedInviteUrl}</p>
+            <button onClick={() => copyInviteUrl(generatedInviteUrl)} className="primary-button w-full py-2.5">
+              <Copy className="h-4 w-4" />
+              复制链接
+            </button>
+          </div>
+        )}
+        {inviteLinks.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {inviteLinks.slice(0, 3).map((invite) => {
+              const remaining = Math.max(0, invite.max_accepts - invite.accepted_count);
+              const expired = new Date(invite.expires_at).getTime() <= Date.now();
+              return (
+                <div key={invite.id} className="rounded-xl bg-sand px-3 py-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-ink/70">
+                        {expired ? '已过期' : `剩余 ${remaining} 次`} · {new Date(invite.expires_at).toLocaleString('zh-CN')}
+                      </p>
+                      <p className="mt-1 truncate text-xs text-ink/40">{inviteUrl(invite.token)}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyInviteUrl(inviteUrl(invite.token))}
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-ink/60"
+                      aria-label="复制邀请链接"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </Card>
       <Card title="操作日志" action={`${activity.length} 条`}>
         {loading.activity && <InlineLoading text="操作日志加载中..." />}

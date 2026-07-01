@@ -13,6 +13,7 @@ import type {
   KnowledgeSource,
   MetaOptions,
   Project,
+  ProjectInviteLink,
   ProjectMember,
   ProjectProgress,
   ProjectStage,
@@ -170,6 +171,26 @@ export const api = {
       method: 'POST',
       token,
       body: JSON.stringify(payload),
+    });
+  },
+  listProjectInviteLinks(token: string, projectId: number) {
+    return request<ProjectInviteLink[]>(`/projects/${projectId}/invite-links`, { token });
+  },
+  createProjectInviteLink(
+    token: string,
+    projectId: number,
+    payload: { role: string; expires_in_hours: number; max_accepts: number },
+  ) {
+    return request<ProjectInviteLink>(`/projects/${projectId}/invite-links`, {
+      method: 'POST',
+      token,
+      body: JSON.stringify(payload),
+    });
+  },
+  acceptProjectInviteLink(token: string, inviteToken: string) {
+    return request<ProjectMember>(`/projects/invite-links/${encodeURIComponent(inviteToken)}/accept`, {
+      method: 'POST',
+      token,
     });
   },
   upload(token: string, projectId: number, file: File) {

@@ -32,6 +32,17 @@ export type ProjectMember = {
   user: User;
 };
 
+export type ProjectInviteLink = {
+  id: number;
+  project_id: number;
+  token: string;
+  role: string;
+  max_accepts: number;
+  accepted_count: number;
+  expires_at: string;
+  created_at: string;
+};
+
 export type Attachment = {
   id: number;
   project_id: number;

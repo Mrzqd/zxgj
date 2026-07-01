@@ -1,9 +1,20 @@
+from datetime import datetime, timedelta, timezone
+from secrets import token_urlsafe
+
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.orm import joinedload
 
 from app.api.deps import CurrentUser, DbSession, require_project_member, require_project_owner
-from app.models import Project, ProjectMember, ProjectRole, User
-from app.schemas import MemberInvite, ProjectCreate, ProjectMemberRead, ProjectRead, ProjectUpdate
+from app.models import Project, ProjectInviteLink, ProjectMember, ProjectRole, User
+from app.schemas import (
+    MemberInvite,
+    ProjectCreate,
+    ProjectInviteLinkCreate,
+    ProjectInviteLinkRead,
+    ProjectMemberRead,
+    ProjectRead,
+    ProjectUpdate,
+)
 from app.services.activity import log_activity
 from app.services.stages import ensure_project_stages
 
@@ -100,3 +111,107 @@ def invite_member(project_id: int, payload: MemberInvite, db: DbSession, user: C
         .filter(ProjectMember.id == member.id)
         .one()
     )
+
+
+@router.get("/{project_id}/invite-links", response_model=list[ProjectInviteLinkRead])
+def list_invite_links(project_id: int, db: DbSession, user: CurrentUser):
+    require_project_owner(db, project_id, user)
+    return (
+        db.query(ProjectInviteLink)
+        .filter(ProjectInviteLink.project_id == project_id)
+        .order_by(ProjectInviteLink.created_at.desc())
+        .limit(20)
+        .all()
+    )
+
+
+@router.post(
+    "/{project_id}/invite-links",
+    response_model=ProjectInviteLinkRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_invite_link(project_id: int, payload: ProjectInviteLinkCreate, db: DbSession, user: CurrentUser):
+    require_project_owner(db, project_id, user)
+    role = payload.role if payload.role in {ProjectRole.owner.value, ProjectRole.editor.value} else ProjectRole.editor.value
+    invite = ProjectInviteLink(
+        project_id=project_id,
+        token=_new_invite_token(db),
+        role=role,
+        max_accepts=payload.max_accepts,
+        expires_at=datetime.now(timezone.utc) + timedelta(hours=payload.expires_in_hours),
+        created_by_id=user.id,
+    )
+    db.add(invite)
+    log_activity(
+        db,
+        project_id=project_id,
+        actor=user,
+        action="create_invite_link",
+        target_type="invite_link",
+        target_id=None,
+        message=f"生成邀请链接：{payload.expires_in_hours} 小时有效，最多 {payload.max_accepts} 次接收",
+    )
+    db.commit()
+    db.refresh(invite)
+    return invite
+
+
+@router.post("/invite-links/{invite_token}/accept", response_model=ProjectMemberRead)
+def accept_invite_link(invite_token: str, db: DbSession, user: CurrentUser):
+    invite = (
+        db.query(ProjectInviteLink)
+        .filter(ProjectInviteLink.token == invite_token)
+        .first()
+    )
+    if invite is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="邀请链接不存在")
+    if _is_expired(invite):
+        raise HTTPException(status_code=status.HTTP_410_GONE, detail="邀请链接已过期")
+    if invite.accepted_count >= invite.max_accepts:
+        raise HTTPException(status_code=status.HTTP_410_GONE, detail="邀请链接接收次数已用完")
+
+    existing = (
+        db.query(ProjectMember)
+        .options(joinedload(ProjectMember.user))
+        .filter(ProjectMember.project_id == invite.project_id, ProjectMember.user_id == user.id)
+        .first()
+    )
+    if existing:
+        return existing
+
+    invite.accepted_count += 1
+    member = ProjectMember(project_id=invite.project_id, user_id=user.id, role=invite.role)
+    db.add(member)
+    log_activity(
+        db,
+        project_id=invite.project_id,
+        actor=user,
+        action="accept_invite",
+        target_type="member",
+        target_id=user.id,
+        message=f"通过邀请链接加入项目：{user.name}",
+    )
+    db.commit()
+    db.refresh(member)
+    return (
+        db.query(ProjectMember)
+        .options(joinedload(ProjectMember.user))
+        .filter(ProjectMember.id == member.id)
+        .one()
+    )
+
+
+def _new_invite_token(db: DbSession) -> str:
+    for _ in range(5):
+        token = token_urlsafe(24)
+        exists = db.query(ProjectInviteLink.id).filter(ProjectInviteLink.token == token).first()
+        if not exists:
+            return token
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="邀请链接生成失败")
+
+
+def _is_expired(invite: ProjectInviteLink) -> bool:
+    expires_at = invite.expires_at
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+    return expires_at <= datetime.now(timezone.utc)
