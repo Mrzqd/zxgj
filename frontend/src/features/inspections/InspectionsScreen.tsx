@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ListTodo, Plus } from 'lucide-react';
 import { api } from '../../api';
-import { Card, EmptyLine, Field, InlineLoading, Modal, ModuleHero, SelectField } from '../../components/ui';
+import { Card, EmptyLine, Field, InlineLoading, Modal, ModuleHero, SelectField, Tip } from '../../components/ui';
 import { useSubmitting } from '../../hooks/useSubmitting';
 import type { Attachment, Inspection, MetaOptions, ProjectStage } from '../../types';
 import { labelOf } from '../../utils/format';
@@ -51,7 +51,7 @@ export function InspectionsScreen({
     <div className="space-y-4">
       <ModuleHero icon={<ListTodo />} title="验收清单" subtitle="瓦工验收、卫生间流水坡度、厨房阴阳角归方逐项记录。" />
       {loading && <InlineLoading text="验收数据加载中..." />}
-      {actionError && <p className="rounded-2xl bg-clay/10 px-3 py-2 text-xs font-semibold text-clay">{actionError}</p>}
+      <Tip message={actionError} onClose={() => setActionError(null)} tone="error" />
       <button onClick={() => setOpen(true)} className="primary-button w-full">
         <Plus className="h-4 w-4" /> 新增验收项
       </button>

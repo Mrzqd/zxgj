@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Copy, Edit3, Link, LogOut, Plus, Trash2, Users } from 'lucide-react';
 import { api } from '../../api';
-import { Card, Field, InlineLoading, Modal, ModuleHero } from '../../components/ui';
+import { Card, Field, InlineLoading, Modal, ModuleHero, Tip } from '../../components/ui';
 import { useSubmitting } from '../../hooks/useSubmitting';
 import type { ActivityLog, Expense, Project, ProjectInviteLink, ProjectMember, ProjectProgress, ProjectStage, User } from '../../types';
 import { dateText, labelOf } from '../../utils/format';
@@ -267,7 +267,7 @@ export function ProfileScreen({
               />
             </Field>
           </div>
-          {message && <p className="text-sm text-clay">{message}</p>}
+          <Tip message={message} onClose={() => setMessage(null)} tone="info" />
           <button disabled={inviteSubmit.submitting} className="secondary-button w-full">
             <Link className="h-4 w-4" />
             {inviteSubmit.submitting ? '生成中...' : '生成邀请链接'}

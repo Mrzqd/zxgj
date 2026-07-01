@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { api } from '../../api';
-import { Field } from '../../components/ui';
+import { Field, Tip } from '../../components/ui';
 import { useSubmitting } from '../../hooks/useSubmitting';
 import type { User } from '../../types';
 
@@ -91,7 +91,7 @@ export function AuthScreen({
                 className="input"
               />
             </Field>
-            {message && <p className="mb-4 rounded-xl bg-clay/10 p-3 text-sm text-clay">{message}</p>}
+            <Tip message={message} onClose={() => setMessage(null)} tone="error" className="mb-4" />
             <button disabled={submitting} className="primary-button w-full">
               {submitting ? '处理中...' : mode === 'login' ? '进入管家' : '创建账号'}
             </button>

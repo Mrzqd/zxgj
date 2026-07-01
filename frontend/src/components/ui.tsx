@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import type { Option } from '../types';
 
 export function Modal({ title, children, onClose }: { title: string; children: ReactNode; onClose: () => void }) {
@@ -111,6 +111,38 @@ export function InlineLoading({ text }: { text: string }) {
     <div className="rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-ink/45 shadow-sm">
       <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-clay/20 border-t-clay align-[-2px]" />
       {text}
+    </div>
+  );
+}
+
+export function Tip({
+  message,
+  onClose,
+  tone = 'info',
+  duration = 2600,
+  className = '',
+}: {
+  message: string | null;
+  onClose: () => void;
+  tone?: 'info' | 'error';
+  duration?: number;
+  className?: string;
+}) {
+  useEffect(() => {
+    if (!message || duration <= 0) return;
+    const timer = window.setTimeout(onClose, duration);
+    return () => window.clearTimeout(timer);
+  }, [duration, message, onClose]);
+
+  if (!message) return null;
+
+  const toneClass = tone === 'error'
+    ? 'border-clay/25 bg-clay/10 text-clay'
+    : 'border-moss/20 bg-moss/10 text-moss';
+
+  return (
+    <div className={`rounded-xl border px-3 py-2 text-xs font-semibold shadow-sm ${toneClass} ${className}`}>
+      {message}
     </div>
   );
 }

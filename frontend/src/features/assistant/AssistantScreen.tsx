@@ -1,7 +1,7 @@
 import { FormEvent, ReactNode, useEffect, useRef, useState } from 'react';
 import { Bot, Download, FileText, Pencil, RefreshCw, Search, Send, Settings, Trash2, UploadCloud, UserRound } from 'lucide-react';
 import { api } from '../../api';
-import { EmptyLine, Field, Modal } from '../../components/ui';
+import { EmptyLine, Field, Modal, Tip } from '../../components/ui';
 import { useSubmitting } from '../../hooks/useSubmitting';
 import type { KnowledgeAnswer, KnowledgeChatHistoryMessage, KnowledgeDocument, KnowledgeSource } from '../../types';
 
@@ -247,7 +247,7 @@ export function AssistantScreen({ token, projectId }: { token: string; projectId
             </button>
           </div>
         </div>
-        {notice && <p className="mt-2 rounded-2xl bg-clay/10 px-3 py-2 text-xs font-semibold text-clay">{notice}</p>}
+        <Tip message={notice} onClose={() => setNotice(null)} tone="info" className="mt-2" />
       </header>
 
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-3 py-3">

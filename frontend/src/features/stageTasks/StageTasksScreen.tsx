@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { CheckCircle2, ClipboardList, Edit3, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { api } from '../../api';
-import { EmptyLine, Field, InlineLoading, Modal, ModuleHero, SelectField } from '../../components/ui';
+import { EmptyLine, Field, InlineLoading, Modal, ModuleHero, SelectField, Tip } from '../../components/ui';
 import { useSubmitting } from '../../hooks/useSubmitting';
 import type { ProjectProgress, StageTask, Option } from '../../types';
 import type { ProjectStage } from '../../types';
@@ -65,7 +65,7 @@ export function StageTasksScreen({
     <div className="space-y-4">
       <ModuleHero icon={<ClipboardList />} title="阶段事项" subtitle="把瓦工开工前的海棠角、归方、找平等现场事项提前排好。" />
       {loading && <InlineLoading text="阶段事项加载中..." />}
-      {actionError && <p className="rounded-2xl bg-clay/10 px-3 py-2 text-xs font-semibold text-clay">{actionError}</p>}
+      <Tip message={actionError} onClose={() => setActionError(null)} tone="error" />
       <div className="grid grid-cols-3 gap-2">
         <SummaryPill label="全部" value={tasks.length} />
         <SummaryPill label="未完成" value={openCount} />

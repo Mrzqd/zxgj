@@ -1,7 +1,7 @@
 import { TouchEvent, useEffect, useState } from 'react';
 import { api, ApiError } from '../api';
 import { BottomNav } from '../components/layout/BottomNav';
-import { ShellLoader } from '../components/ui';
+import { ShellLoader, Tip } from '../components/ui';
 import { AuthScreen } from '../features/auth/AuthScreen';
 import { AssistantScreen } from '../features/assistant/AssistantScreen';
 import { ComparisonsScreen } from '../features/comparisons/ComparisonsScreen';
@@ -348,11 +348,7 @@ export function App() {
         style={{ transform: pullRefreshOffset > 0 ? `translateY(${pullRefreshOffset}px)` : undefined }}
       >
         <PullRefreshIndicator state={pullRefreshState} offset={pullRefreshOffset} />
-        {message && (
-          <div className="mx-3 mt-3 rounded-2xl border border-clay/30 bg-clay/10 px-4 py-3 text-sm text-clay">
-            {message}
-          </div>
-        )}
+        <Tip message={message} onClose={() => setMessage(null)} tone="info" className="mx-3 mt-3" />
         {!currentProject ? (
           <ProjectEmpty token={token} onCreated={refreshProjects} />
         ) : (

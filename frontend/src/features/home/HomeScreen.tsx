@@ -2,7 +2,7 @@ import { CheckCircle2, CheckSquare, ChevronDown, Edit3, Plus, RotateCcw, Trash2 
 import { useState } from 'react';
 import { api } from '../../api';
 import type { AppData } from '../../app/types';
-import { Card, EmptyLine, InlineLoading, Metric } from '../../components/ui';
+import { Card, EmptyLine, InlineLoading, Metric, Tip } from '../../components/ui';
 import type { Project, StageTask, Todo } from '../../types';
 import { dateText, labelOf, money } from '../../utils/format';
 import { todoImportanceLabel } from '../../utils/todo';
@@ -163,7 +163,7 @@ export function HomeScreen({
         }
       >
         {loading.todos && <InlineLoading text="待办数据加载中..." />}
-        {actionError && <p className="mb-2 rounded-2xl bg-clay/10 px-3 py-2 text-xs font-semibold text-clay">{actionError}</p>}
+        <Tip message={actionError} onClose={() => setActionError(null)} tone="error" className="mb-2" />
         <div className="mb-2 grid grid-cols-3 gap-2 text-xs font-semibold">
           {[
             ['open', `待处理 ${openTodos.length}`],
@@ -246,7 +246,7 @@ export function HomeScreen({
       )}
       <Card title="当前阶段事项" action={labelOf(data.stages, currentStage)}>
         {loading.stageTasks && <InlineLoading text="当前阶段事项加载中..." />}
-        {stageTaskError && <p className="mb-2 rounded-2xl bg-clay/10 px-3 py-2 text-xs font-semibold text-clay">{stageTaskError}</p>}
+        <Tip message={stageTaskError} onClose={() => setStageTaskError(null)} tone="error" className="mb-2" />
         <div className="space-y-3">
           {visibleStageTasks.map((task) => (
             <div key={task.id} className="rounded-2xl border border-ink/10 bg-white px-4 py-3">
