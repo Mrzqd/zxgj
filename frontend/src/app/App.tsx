@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { TouchEvent, useEffect, useState } from 'react';
 import { api, ApiError } from '../api';
 import { BottomNav } from '../components/layout/BottomNav';
 import { ShellLoader } from '../components/ui';
@@ -26,6 +26,7 @@ type DataLoadingKey =
   | 'activity';
 
 type DataLoading = Record<DataLoadingKey, boolean>;
+type PullRefreshState = 'idle' | 'pulling' | 'ready' | 'refreshing';
 
 const emptyDataLoading: DataLoading = {
   expenses: false,
@@ -40,6 +41,8 @@ const emptyDataLoading: DataLoading = {
 };
 
 const allDataLoadingKeys = Object.keys(emptyDataLoading) as DataLoadingKey[];
+const PULL_REFRESH_THRESHOLD = 74;
+const PULL_REFRESH_MAX_OFFSET = 96;
 
 export function App() {
   const [pendingInviteToken, setPendingInviteToken] = useState(() => {
@@ -59,6 +62,9 @@ export function App() {
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState<DataLoading>(emptyDataLoading);
+  const [pullRefreshState, setPullRefreshState] = useState<PullRefreshState>('idle');
+  const [pullRefreshOffset, setPullRefreshOffset] = useState(0);
+  const [pullStartY, setPullStartY] = useState<number | null>(null);
 
   const currentProject = projects.find((project) => project.id === projectId) || null;
 
@@ -213,6 +219,58 @@ export function App() {
     });
   }
 
+  async function refreshCurrentPage() {
+    if (!token || !projectId || pullRefreshState === 'refreshing') return;
+    setPullRefreshState('refreshing');
+    setPullRefreshOffset(52);
+    try {
+      await refreshProjects(token, projectId);
+      await refreshProjectData(projectId);
+      setMessage('页面已刷新');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '刷新失败');
+    } finally {
+      window.setTimeout(() => {
+        setPullRefreshState('idle');
+        setPullRefreshOffset(0);
+      }, 360);
+    }
+  }
+
+  function startPullRefresh(event: TouchEvent<HTMLElement>) {
+    if (!currentProject || pullRefreshState === 'refreshing' || window.scrollY > 0) return;
+    if (isInteractiveElement(event.target)) return;
+    setPullStartY(event.touches[0]?.clientY ?? null);
+  }
+
+  function movePullRefresh(event: TouchEvent<HTMLElement>) {
+    if (pullStartY === null || pullRefreshState === 'refreshing') return;
+    const currentY = event.touches[0]?.clientY ?? pullStartY;
+    const distance = currentY - pullStartY;
+    if (distance <= 0) {
+      setPullRefreshOffset(0);
+      setPullRefreshState('idle');
+      return;
+    }
+    if (window.scrollY > 0) return;
+    const offset = Math.min(PULL_REFRESH_MAX_OFFSET, Math.round(distance * 0.5));
+    setPullRefreshOffset(offset);
+    setPullRefreshState(offset >= PULL_REFRESH_THRESHOLD ? 'ready' : 'pulling');
+  }
+
+  function endPullRefresh() {
+    if (pullStartY === null) return;
+    setPullStartY(null);
+    if (pullRefreshState === 'ready') {
+      refreshCurrentPage();
+      return;
+    }
+    if (pullRefreshState !== 'refreshing') {
+      setPullRefreshState('idle');
+      setPullRefreshOffset(0);
+    }
+  }
+
   useEffect(() => {
     if (!token) return;
     setLoading(true);
@@ -278,8 +336,18 @@ export function App() {
   }
 
   return (
-    <main className="min-h-screen bg-sand text-ink">
-      <div className="mx-auto min-h-screen max-w-md bg-linen shadow-card">
+    <main
+      className="min-h-screen bg-sand text-ink"
+      onTouchStart={startPullRefresh}
+      onTouchMove={movePullRefresh}
+      onTouchEnd={endPullRefresh}
+      onTouchCancel={endPullRefresh}
+    >
+      <div
+        className="mx-auto min-h-screen max-w-md bg-linen shadow-card transition-transform duration-200 ease-out"
+        style={{ transform: pullRefreshOffset > 0 ? `translateY(${pullRefreshOffset}px)` : undefined }}
+      >
+        <PullRefreshIndicator state={pullRefreshState} offset={pullRefreshOffset} />
         {message && (
           <div className="mx-3 mt-3 rounded-2xl border border-clay/30 bg-clay/10 px-4 py-3 text-sm text-clay">
             {message}
@@ -378,4 +446,26 @@ export function App() {
       </div>
     </main>
   );
+}
+
+function PullRefreshIndicator({ state, offset }: { state: PullRefreshState; offset: number }) {
+  const active = state !== 'idle';
+  const text = state === 'refreshing' ? '刷新中...' : state === 'ready' ? '释放刷新' : '下拉刷新';
+  return (
+    <div
+      className={`pointer-events-none fixed left-1/2 top-3 z-40 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-ink/60 shadow-card transition-opacity ${
+        active ? 'opacity-100' : 'opacity-0'
+      }`}
+      style={{ transform: `translate(-50%, ${Math.max(0, offset - 58)}px)` }}
+      aria-hidden={!active}
+    >
+      <span className={`h-3 w-3 rounded-full border-2 border-clay/25 border-t-clay ${state === 'refreshing' ? 'animate-spin' : ''}`} />
+      {text}
+    </div>
+  );
+}
+
+function isInteractiveElement(target: EventTarget): boolean {
+  if (!(target instanceof Element)) return false;
+  return Boolean(target.closest('button, input, textarea, select, a, [role="button"]'));
 }
