@@ -114,3 +114,5 @@ cd frontend
 npm install
 npm run dev
 ```
+
+Docker Compose 中的前端使用生产构建，由 Nginx 托管 `dist` 并代理 `/api` 到后端；本地单独开发前端时仍使用 Vite dev server。

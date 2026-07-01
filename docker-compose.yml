@@ -61,7 +61,7 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://renovation:renovation@db:5432/renovation
       SECRET_KEY: change-me-in-production
-      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      CORS_ORIGINS: http://localhost,http://127.0.0.1,http://localhost:5173,http://127.0.0.1:5173
       S3_BUCKET: renovation-assets
       S3_ENDPOINT_URL: http://minio:9000
       S3_PUBLIC_BASE_URL: http://localhost:9000/renovation-assets
@@ -148,17 +148,9 @@ services:
         condition: service_healthy
 
   frontend:
-    image: node:22-alpine
-    working_dir: /app
-    command: sh -c "npm install && npm run dev"
-    environment:
-      VITE_API_BASE: /api
-      VITE_PROXY_TARGET: http://backend:8000
-    volumes:
-      - ./frontend:/app
-      - frontend-node-modules:/app/node_modules
+    build: ./frontend
     ports:
-      - "5173:5173"
+      - "5173:80"
     depends_on:
       - backend
 
@@ -166,4 +158,3 @@ volumes:
   postgres-data:
   minio-data:
   redis-data:
-  frontend-node-modules:
